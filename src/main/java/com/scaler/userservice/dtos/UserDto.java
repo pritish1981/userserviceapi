@@ -19,6 +19,7 @@ public class UserDto {
         userDto.setName(user.getName());
         userDto.setMail(user.getEmail());
         userDto.setRoles(user.getRoles());
+
         return userDto;
     }
 }

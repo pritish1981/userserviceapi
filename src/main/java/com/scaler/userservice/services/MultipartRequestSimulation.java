@@ -7,15 +7,13 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.util.EntityUtils;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-
 public class MultipartRequestSimulation {
     public static void main(String[] args) {
         try {
@@ -23,14 +21,14 @@ public class MultipartRequestSimulation {
             File file = new File("C:\\Users\\Documents\\Pritish_Senapati_Resume.doc");
             FileBody fileBody = new FileBody(file, ContentType.DEFAULT_BINARY);
 
-            // Create the XML payload part
-            String xmlPayload = "<payload><data>Example Data</data></payload>";
-            StringBody xmlBody = new StringBody(xmlPayload, ContentType.APPLICATION_XML);
+            // Create the JSON payload part
+            String jsonPayload = "{\"data\":\"Example Data\"}";
+            StringBody jsonBody = new StringBody(jsonPayload, ContentType.APPLICATION_JSON);
 
             // Build the multipart request
             HttpEntity multipart = MultipartEntityBuilder.create()
                     .addPart("file", fileBody)
-                    .addPart("payload", xmlBody)
+                    .addPart("payload", jsonBody)
                     .build();
 
             // Convert multipart entity to byte array (simulate sending the request)
@@ -43,21 +41,20 @@ public class MultipartRequestSimulation {
             System.out.println("Multipart Content (Simulated Request):");
             System.out.println(multipartContent);
 
-            // Simulate server response (XML content)
-            String serverResponse = "<response><status>success</status><message>File received</message></response>";
+            // Simulate server response (JSON content)
+            String serverResponse = "{\"status\":\"success\",\"message\":\"File received\"}";
             System.out.println("\nServer Response (Simulated):");
             System.out.println(serverResponse);
 
-            // Parse the simulated server response as XML
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new ByteArrayInputStream(serverResponse.getBytes(StandardCharsets.UTF_8)));
+            // Parse the simulated server response as JSON
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode responseJson = mapper.readTree(new ByteArrayInputStream(serverResponse.getBytes(StandardCharsets.UTF_8)));
 
-            // Process the XML response
-            String status = document.getElementsByTagName("status").item(0).getTextContent();
-            String message = document.getElementsByTagName("message").item(0).getTextContent();
+            // Process the JSON response
+            String status = responseJson.get("status").asText();
+            String message = responseJson.get("message").asText();
 
-            System.out.println("\nParsed XML Response:");
+            System.out.println("\nParsed JSON Response:");
             System.out.println("Status: " + status);
             System.out.println("Message: " + message);
 
